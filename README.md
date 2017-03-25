@@ -1,6 +1,6 @@
 ![Logo of the project](http://www.txstate.edu/cache7c04ddd68031e2bc11c0d626f2c05657/imagehandler/scaler/gato-docs.its.txstate.edu/jcr:df0d6df7-b40f-41c2-a24f-9fb102d5ef2e/Supercat%2BLogo.png?mode=fit&width=270)
 
-# Content Manager
+# Custom Shell 
 > Unix Project 2 - Spring 2017
 
 Project Description:
