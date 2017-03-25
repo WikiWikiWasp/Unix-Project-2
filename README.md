@@ -7,9 +7,13 @@ Project Description:
 You have learned how to work with processes and files in Linux. Now, you are expected to make a shell and some Linux commands so that you can handle some basic operations in Linux. You are going to
 
 a) Practice with Makefile
+
 b) Practice with process operations in Linux
+
 c) Practice with IO operations in Linux
+
 d) Learn to use POSIX library for untaught functions
+
 e) Learn to debug a program
 
 
