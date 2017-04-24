@@ -5,6 +5,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #define MAX_SIZE 100
 
@@ -12,8 +14,16 @@ int main(int argc, char** argv) {
   while (1) {
     pid_t pid;
     int status;
-    char a[100]; 
-    char cmd[100]; 
+    char a[100];
+    char b[3];
+    char c[2];
+    strcpy(b, "my");
+    strcpy(c, ">"); 
+    char dotslash[3];
+    strcpy(dotslash, "./"); 
+    char cmd[100];
+    char temp[100];
+    int mystdout; 
 
     pid = fork();
     if (pid < 0) {
@@ -45,6 +55,21 @@ int main(int argc, char** argv) {
 	res[n_spaces] = 0;
  
 	strcpy(cmd, res[0]);
+	if (strncmp(cmd, b, strlen(b)) == 0) {
+	  strcat(dotslash, cmd);
+	  strcpy(cmd, dotslash);
+	}
+
+
+        if (res[2] != NULL) {
+	  if (strncmp(res[2], c, strlen(c)) == 0) {
+	    res[2]++;
+	    mystdout = open(res[2], O_CREAT|O_WRONLY);
+	    close(1);
+	    dup2(mystdout, 1); 
+	  }
+	}
+	  
 	execvp(cmd, res);
 	printf("%s\n", strerror(errno)); 
 	exit(errno); 
