@@ -17,13 +17,16 @@ int main(int argc, char** argv) {
     char a[100];
     char b[3];
     char c[2];
+    char d[2];
     strcpy(b, "my");
-    strcpy(c, ">"); 
+    strcpy(c, ">");
+    strcpy(d, "<"); 
     char dotslash[3];
     strcpy(dotslash, "./"); 
     char cmd[100];
     char temp[100];
-    int mystdout; 
+    int mystdout;
+    int mystdin; 
 
     pid = fork();
     if (pid < 0) {
@@ -60,11 +63,19 @@ int main(int argc, char** argv) {
 	  strcpy(cmd, dotslash);
 	}
 
+	if (res[1] != NULL) {
+	  if (strncmp(res[1], d, strlen(d)) == 0) {
+	    res[1]++;
+	    mystdin = open(res[1], O_RDONLY); 
+	    close(0);
+	    dup2(mystdin, 0);
+	  }
+	}
 
         if (res[2] != NULL) {
 	  if (strncmp(res[2], c, strlen(c)) == 0) {
 	    res[2]++;
-	    mystdout = open(res[2], O_CREAT|O_WRONLY);
+	    mystdout = open(res[2], O_CREAT|O_WRONLY, 0666);
 	    close(1);
 	    dup2(mystdout, 1); 
 	  }
