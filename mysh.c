@@ -13,18 +13,23 @@
 int main(int argc, char** argv) {
   while (1) {
     pid_t pid;
+    pid_t pipe_pid;
+    int pipefd[2]; 
     int status;
     char a[100];
     char b[3];
     char c[2];
     char d[2];
+    char e[2]; 
     strcpy(b, "my");
     strcpy(c, ">");
-    strcpy(d, "<"); 
+    strcpy(d, "<");
+    strcpy(e, "|"); 
     char dotslash[3];
     strcpy(dotslash, "./"); 
     char cmd[100];
-    char temp[100];
+    char *holder1[2];
+    char *holder2[2]; 
     int mystdout;
     int mystdin; 
 
@@ -69,6 +74,28 @@ int main(int argc, char** argv) {
 	    mystdin = open(res[1], O_RDONLY); 
 	    close(0);
 	    dup2(mystdin, 0);
+	  }
+	  else if (strncmp(res[1], e, strlen(e)) == 0) {
+	    pipe(pipefd);
+
+	    pipe_pid = fork();
+
+	    if (pipe_pid == 0) {
+	      holder1[0] = cmd;
+	      holder1[1] = NULL; 
+	      dup2(pipefd[0], 0);
+	      close(pipefd[1]);
+	      execvp(cmd, holder1);
+	      }
+	    else {
+	      strcpy(cmd, res[2]);
+	      holder2[0] = cmd;
+	      holder2[1] = NULL; 
+	      dup2(pipefd[1], 1);
+	      close(pipefd[0]);
+	      execvp(cmd, holder2);
+	      continue; 
+	    }	  
 	  }
 	}
 
