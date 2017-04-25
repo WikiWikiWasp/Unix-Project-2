@@ -76,16 +76,24 @@ int printFileDetail(char *file, int widthSize)
 // take in directory name in char array
 // prints out just names of files and directories
 void printDir(char *path) {
-  struct dirent *namelist;
+  // struct dirent *namelist;
+  struct dirent **namelist;
   DIR *dir;
   int n,
       i=0;
 
   dir = opendir(path);                             // open directory
   if (dir) {
-    while ((namelist = readdir(dir)) != NULL) {    // read files except . & ..
-      if (strcmp(namelist->d_name,".") != 0 && strcmp(namelist->d_name,"..") != 0) {
-        printf("%s ", namelist->d_name);           // print filename
+    n = scandir(path, &namelist, NULL, alphasort); // read files except . & ..
+    if (n < 0)
+        perror("scandir error");
+    else {
+      while (i<n) {
+        if (strcmp(namelist[i]->d_name,".") != 0 && strcmp(namelist[i]->d_name,"..") != 0) {
+          printf("%s ", namelist[i]->d_name);
+        }
+        free(namelist[i]);
+        ++i;
       }
     }
     closedir(dir);                                 // close dir
@@ -99,7 +107,8 @@ void printDir(char *path) {
 // take in directory name in char array
 // prints out names of files and directories with all file details
 void printDirDetails(char *path) {
-  struct dirent *namelist;
+  struct dirent *namelistPtr;
+  struct dirent **namelist;
   DIR *dir;
   int n,
       widthDigits,
@@ -110,10 +119,10 @@ void printDirDetails(char *path) {
   dir = opendir(path);                            // open dir
   if (dir) {
     // get the width of the digits of the largest file size
-    while ((namelist = readdir(dir)) != NULL) {
-      if (strcmp(namelist->d_name,".") != 0 && strcmp(namelist->d_name,"..") != 0) {
-        if (getFileSize(namelist->d_name) > largestFileSize) {
-          largestFileSize = getFileSize(namelist->d_name);
+    while ((namelistPtr = readdir(dir)) != NULL) {
+      if (strcmp(namelistPtr->d_name,".") != 0 && strcmp(namelistPtr->d_name,"..") != 0) {
+        if (getFileSize(namelistPtr->d_name) > largestFileSize) {
+          largestFileSize = getFileSize(namelistPtr->d_name);
         }
       }
     }
@@ -126,9 +135,16 @@ void printDirDetails(char *path) {
   // second time, prints details of every file
   dir = opendir(path);
   if (dir) {
-    while ((namelist = readdir(dir)) != NULL) {  // loop through all file
-      if (strcmp(namelist->d_name,".") != 0 && strcmp(namelist->d_name,"..") != 0) {
-        printFileDetail(namelist->d_name, widthDigits);  // print file details
+    n = scandir(path, &namelist, NULL, alphasort); // read files except . & ..
+    if (n < 0)
+        perror("scandir error");
+    else {
+      while (i<n) {
+        if (strcmp(namelist[i]->d_name,".") != 0 && strcmp(namelist[i]->d_name,"..") != 0) {
+          printFileDetail(namelist[i]->d_name, widthDigits);  // print file details
+        }
+        free(namelist[i]);
+        ++i;
       }
     }
     closedir(dir);                              // close directory
