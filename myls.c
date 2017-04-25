@@ -144,21 +144,20 @@ void printDirDetails(char *path) {
 
 int main(int argc, char *argv[]) {
 
-  int lflag = 0;
-
   char *cvalue = NULL;
   int index;
   int c;
+  int lflag = 0;
 
-  opterr = 0;
+  opterr = 0;                                   // for getopt
 
-  while ((c = getopt (argc, argv, "l")) != -1)
+  while ((c = getopt (argc, argv, "l")) != -1)  // loop through options
     switch (c)
       {
-      case 'l':
+      case 'l':                                 // if -l option, set lflat to 1
         lflag = 1;
         break;
-      case '?':
+      case '?':                                 // all other options throw err
         if (isprint (optopt))
           fprintf (stderr, "Unknown option `-%c'.\n", optopt);
         else
@@ -171,29 +170,30 @@ int main(int argc, char *argv[]) {
       }
 
   struct stat path_stat;
-  stat(argv[optind], &path_stat);
+  stat(argv[optind], &path_stat);               // get directory details
 
   if (!argv[optind]) {        // if no args supplied, list files in current dir
     if (lflag) {
-      printDirDetails(".");
+      printDirDetails(".");   // if -l option, print filenames with details
     } else {
-      printDir(".");
+      printDir(".");          // if no -l option, print simple filenames
     }
 
   } else {                // if args supplied, check if source is file or dir
 
-    if (S_ISREG(path_stat.st_mode) == 1) {         // print file
+    if (S_ISREG(path_stat.st_mode) == 1) {         // if file, not directory
       int widthDigits;
-      if (lflag) {
-        widthDigits = (int)floor(log10(llabs(getFileSize(argv[optind])))) + 1;;
-        printFileDetail(argv[optind], widthDigits);
+      if (lflag) {                                 // if -l
+        // get width of digits of filesize's bytes
+        widthDigits = (int)floor(log10(llabs(getFileSize(argv[optind])))) + 1;
+        printFileDetail(argv[optind], widthDigits);// print file details
       } else {
-        printf("%s",argv[optind]);
+        printf("%s",argv[optind]);                // if no -l print simple files
       }
-    } else if (S_ISDIR(path_stat.st_mode) == 1) {  // print dir
-      printDir(argv[optind]);
+    } else if (S_ISDIR(path_stat.st_mode) == 1) {  // if directory, not file
+      printDir(argv[optind]);                      // print the directory
     } else {
-      printf("No file or directory %s found",argv[optind]);
+      printf("No file or directory %s found",argv[optind]); // err if not found
     }
 
   }
