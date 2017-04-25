@@ -1,4 +1,4 @@
-#include <dirent.h>
+nclude <dirent.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -13,6 +13,8 @@
 #include <grp.h>
 
 
+// get file size in bytes
+// takes in filename in char array, returns the file size (in bytes)
 long long getFileSize(char *file)
 {
   struct stat sb;
@@ -27,8 +29,8 @@ long long getFileSize(char *file)
   return filesize;
 }
 
-/* prints details for one file */
-/* takes file name string param */
+// prints details for one file
+// takes file name string param
 int printFileDetail(char *file, int widthSize)
 {
   struct passwd *user;
@@ -36,16 +38,18 @@ int printFileDetail(char *file, int widthSize)
   struct stat sb;
   char   mTimeStr[21];
 
-  if (stat(file, &sb) == -1) {
+  if (stat(file, &sb) == -1) {  // get file info
     perror("stat");
     exit(EXIT_FAILURE);
   }
 
-  user = getpwuid(sb.st_uid);
-  grp = getgrgid(sb.st_gid);
+  user = getpwuid(sb.st_uid);   // get user id
+  grp = getgrgid(sb.st_gid);    // get group id
+
+  // get date & time of last file modification
   strftime(mTimeStr, sizeof(mTimeStr), " %b %d %I:%M", localtime(&sb.st_mtime));
 
-  /* http://stackoverflow.com/a/10323131/2446454 */
+  // file permissions output from http://stackoverflow.com/a/10323131/2446454
   printf( (S_ISDIR(sb.st_mode)) ? "d" : "-");
   printf( (sb.st_mode & S_IRUSR) ? "r" : "-");
   printf( (sb.st_mode & S_IWUSR) ? "w" : "-");
@@ -57,10 +61,13 @@ int printFileDetail(char *file, int widthSize)
   printf( (sb.st_mode & S_IWOTH) ? "w" : "-");
   printf( (sb.st_mode & S_IXOTH) ? "x" : "-");
 
-  printf(" %d %s %s ", sb.st_nlink, user->pw_name, grp->gr_name); // mac osx
-  //printf(" %lu %s %s ", sb.st_nlink, user->pw_name, grp->gr_name); // ubuntu
+  // print number of links, user name, group name
+  //printf(" %d %s %s ", sb.st_nlink, user->pw_name, grp->gr_name); // mac osx
+  printf(" %lu %s %s ", sb.st_nlink, user->pw_name, grp->gr_name); // ubuntu
+
+  // print file size (width formatted to longest filesize)
   printf("%*lld", widthSize, (long long) sb.st_size);
-  printf("%s %s\n", mTimeStr, file);
+  printf("%s %s\n", mTimeStr, file); // print date & time of last file mod
 
   return 0;
 }
@@ -69,7 +76,8 @@ int printFileDetail(char *file, int widthSize)
 
 
 
-
+// print directory
+// take in directory name in char array
 void printDir(char *path) {
   struct dirent *namelist;
   DIR *dir;
