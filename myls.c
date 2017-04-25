@@ -1,4 +1,4 @@
-nclude <dirent.h>
+#include <dirent.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -76,28 +76,32 @@ int printFileDetail(char *file, int widthSize)
 
 
 
-// print directory
+// print simple directory
 // take in directory name in char array
+// prints out just names of files and directories
 void printDir(char *path) {
   struct dirent *namelist;
   DIR *dir;
   int n,
       i=0;
 
-  dir = opendir(path);
+  dir = opendir(path);                             // open directory
   if (dir) {
-    while ((namelist = readdir(dir)) != NULL) {
+    while ((namelist = readdir(dir)) != NULL) {    // read files except . & ..
       if (strcmp(namelist->d_name,".") != 0 && strcmp(namelist->d_name,"..") != 0) {
-        printf("%s ", namelist->d_name);
+        printf("%s ", namelist->d_name);           // print filename
       }
     }
-    closedir(dir);
+    closedir(dir);                                 // close dir
   } else {
-    printf("directory %s not found\n",path);
+    printf("directory %s not found\n",path);       // print err if dir not found
   }
-  free(namelist);
+  free(namelist);                                  // deallocate namelist
 }
 
+// print detailed directory
+// take in directory name in char array
+// prints out names of files and directories with all file details
 void printDirDetails(char *path) {
   struct dirent *namelist;
   DIR *dir;
@@ -106,9 +110,9 @@ void printDirDetails(char *path) {
       i=0;
   long long largestFileSize = 0;
 
-  dir = opendir(path);
+  // first time, just gets width of digits of largest file size's bytes
+  dir = opendir(path);                            // open dir
   if (dir) {
-
     // get the width of the digits of the largest file size
     while ((namelist = readdir(dir)) != NULL) {
       if (strcmp(namelist->d_name,".") != 0 && strcmp(namelist->d_name,"..") != 0) {
@@ -119,23 +123,21 @@ void printDirDetails(char *path) {
     }
     widthDigits = (int)floor(log10(llabs(largestFileSize))) + 1;
   } else {
-    printf("directory %s not found\n",path);
+    printf("directory %s not found\n",path);     // print error if not found
   }
+  closedir(dir);                                 // close directory
 
-  closedir(dir);
+  // second time, prints details of every file
   dir = opendir(path);
   if (dir) {
-    // print all the file details
-    while ((namelist = readdir(dir)) != NULL) {
-
+    while ((namelist = readdir(dir)) != NULL) {  // loop through all file
       if (strcmp(namelist->d_name,".") != 0 && strcmp(namelist->d_name,"..") != 0) {
-        printFileDetail(namelist->d_name, widthDigits);
+        printFileDetail(namelist->d_name, widthDigits);  // print file details
       }
     }
-    closedir(dir);
+    closedir(dir);                              // close directory
   }
-
-  free(namelist);
+  free(namelist);                               // deallocate namelist
 }
 
 
