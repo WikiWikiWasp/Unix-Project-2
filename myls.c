@@ -3,15 +3,15 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
 #include <time.h>
 #include <stdlib.h>
 #include <math.h>
 #include <pwd.h>
 #include <grp.h>
-
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
 
 // get file size in bytes
 // takes in filename in char array, returns the file size (in bytes)
@@ -79,9 +79,13 @@ void printDir(char *path) {
   // struct dirent *namelist;
   struct dirent **namelist;
   DIR *dir;
+  struct winsize w;
   int n,
-      i=0;
+      i=0,
+      colCount = 0,
+      largestFilename = 0;
 
+  // first time loop through each file and get longest filename
   dir = opendir(path);                             // open directory
   if (dir) {
     n = scandir(path, &namelist, NULL, alphasort); // read files except . & ..
@@ -90,7 +94,9 @@ void printDir(char *path) {
     else {
       while (i<n) {
         if (strcmp(namelist[i]->d_name,".") != 0 && strcmp(namelist[i]->d_name,"..") != 0) {
-          printf("%s ", namelist[i]->d_name);
+          if (strlen(namelist[i]->d_name) > largestFilename) {
+            largestFilename = strlen(namelist[i]->d_name);
+          }
         }
         free(namelist[i]);
         ++i;
@@ -100,6 +106,34 @@ void printDir(char *path) {
   } else {
     printf("directory %s not found\n",path);       // print err if dir not found
   }
+
+  // second time loop through each file and print filename
+  dir = opendir(path);                             // open directory
+  if (dir) {
+    n = scandir(path, &namelist, NULL, alphasort); // read files except . & ..
+    if (n < 0)
+        perror("scandir error");
+    else {
+      i=0;
+      while (i<n) {
+        // print each filename width width equal to longest filename width
+        ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);      // get terminal width
+        if (strcmp(namelist[i]->d_name,".") != 0 && strcmp(namelist[i]->d_name,"..") != 0) {
+          printf("%-*s ", largestFilename, namelist[i]->d_name);
+          colCount += largestFilename;
+          // add linebreak on every column closest to terminal's right edge
+          if ( (colCount + largestFilename) > (w.ws_col) ) {
+            printf("\n");  // add line break
+            colCount = 0;  // reset character column colunt
+          }
+        }
+        free(namelist[i]);
+        ++i;
+      }
+    }
+    closedir(dir);                                 // close dir
+  }
+
   free(namelist);                                  // deallocate namelist
 }
 
