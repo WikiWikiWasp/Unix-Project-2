@@ -24,9 +24,9 @@ int main(int argc, char *argv[]) {
       if (S_ISDIR(pathStat.st_mode)) {                  // if dir, not file
         printf("mycat: %s: Is a directory\n",filename); // print "is a dir"
       }
-      while (fgets(buffer, BUFSIZ, fp) != NULL)         // print file contents
+      while (fgets(buffer, BUFSIZ, fp) != NULL) {       // print file contents
         printf("%s",buffer);
-      };
+      }
     }
   } else {
       // if no args detected, handle the cases ./mycat <foo.txt & mycat $(myls)
