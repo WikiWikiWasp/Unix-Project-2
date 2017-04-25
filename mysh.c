@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
     strcpy(c, ">");
     strcpy(d, "<");
     strcpy(e, "|"); 
-    char dotslash[3];
+    char dotslash[10];
     strcpy(dotslash, "./"); 
     char cmd[100];
     char *holder1[2];
@@ -66,6 +66,7 @@ int main(int argc, char** argv) {
 	if ((strncmp(cmd, b, strlen(b)) == 0) && (strcmp(cmd, "mycd") != 0)) {
 	  strcat(dotslash, cmd);
 	  strcpy(cmd, dotslash);
+	  strcpy(dotslash, "./"); 
 	}
 	else if (strcmp(cmd, "mycd") == 0) {
 	  chdir(res[1]);
@@ -84,21 +85,22 @@ int main(int argc, char** argv) {
 
 	    pipe_pid = fork();
 
-	    if (pipe_pid == 0) {
+	    if (pipe_pid) {
 	      holder1[0] = cmd;
 	      holder1[1] = NULL; 
-	      dup2(pipefd[0], 0);
-	      close(pipefd[1]);
-	      execvp(cmd, holder1);
-	      }
-	    else {
-	      strcpy(cmd, res[2]);
-	      holder2[0] = cmd;
-	      holder2[1] = NULL; 
 	      dup2(pipefd[1], 1);
 	      close(pipefd[0]);
+	      execvp(cmd, holder1);
+	    }
+	    if (pipe_pid == 0) {
+	      strcpy(cmd, res[2]);
+	      holder2[0] = cmd;
+	      holder2[1] = NULL;
+	      strcat(dotslash, cmd);
+	      strcpy(cmd, dotslash);
+	      dup2(pipefd[0], 0);
+	      close(pipefd[1]);
 	      execvp(cmd, holder2);
-	      continue; 
 	    }	  
 	  }
 	}
