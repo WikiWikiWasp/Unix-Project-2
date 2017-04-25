@@ -98,7 +98,7 @@ int main (int argc, char **argv)
     fileCopy(source, dest);
   } else if (S_ISDIR(pathStat.st_mode)) {                            // if directory
     if (!rflag) {
-      fprintf(stderr,"mycp: %s is a directory (not copied).",source);// error
+      fprintf(stderr,"mycp: %s is a directory (not copied).\n",source);// error
     } else {
 
       if ((sourceDirPtr = opendir(source)) == NULL) {                // open dir
