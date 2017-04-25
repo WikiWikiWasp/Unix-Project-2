@@ -72,10 +72,6 @@ int printFileDetail(char *file, int widthSize)
   return 0;
 }
 
-
-
-
-
 // print simple directory
 // take in directory name in char array
 // prints out just names of files and directories
@@ -139,8 +135,6 @@ void printDirDetails(char *path) {
   }
   free(namelist);                               // deallocate namelist
 }
-
-
 
 int main(int argc, char *argv[]) {
 
