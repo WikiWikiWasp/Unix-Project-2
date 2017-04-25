@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) {
     } else if (S_ISDIR(path_stat.st_mode) == 1) {  // if directory, not file
       printDir(argv[optind]);                      // print the directory
     } else {
-      printf("No file or directory %s found",argv[optind]); // err if not found
+      printf("No file or directory %s found\n",argv[optind]); // err if not found
     }
 
   }
