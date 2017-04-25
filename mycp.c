@@ -8,28 +8,84 @@
 
 /*******************************************************************
 * NAME :            fileCopy
-*
 * DESCRIPTION :     copies a source file to destination file
-*
 * INPUTS :
 *       PARAMETERS:
 *           char    *source        source file
 *           char    *dest          destination file
 *******************************************************************/
-
 void fileCopy(char *source, char *dest) {
-
   char buffer[BUFSIZ];
   FILE *sourceFile,
        *destFile;
   size_t readBytes;
-
   sourceFile = fopen(source, "r");        // open source file
   destFile = fopen(dest, "w");            // open dest file
-
   // copy contents of sourceFile to destFile
   while (0 < (readBytes = fread(buffer, 1, BUFSIZ, sourceFile))) {
     fwrite(buffer, 1, readBytes, destFile);
+  }
+}
+
+/*******************************************************************
+* NAME :            directoryCopy
+* DESCRIPTION :     copies a source dir to destination dir
+* INPUTS :
+*       PARAMETERS:
+*           char    *source        source directory
+*           char    *dest          destination directory
+*           int     rflag          -r option (0 or 1)
+*******************************************************************/
+void directoryCopy(char *source, char *dest, int rflag) {
+  int    sourceLen;
+  int    destLen;
+  char   *sourcePath;
+  char   *destPath;
+  DIR		 *sourceDirPtr;
+  struct dirent	*fileInDir;
+  struct stat destDir = {0};
+
+  if (!rflag) {
+    fprintf(stderr,"mycp: %s is a directory (not copied).\n",source);// error
+  } else {
+    if ((sourceDirPtr = opendir(source)) == NULL) {                // open dir
+      fprintf(stderr,"directory not found");
+    }
+
+    if (stat(dest, &destDir) == -1) {                             // create dir
+      mkdir(dest, 0755);
+    }
+
+    while ((fileInDir = readdir(sourceDirPtr)) != NULL) {         // for each file
+
+      struct stat fileStat;
+      sourceLen = sizeof(source) + sizeof(fileInDir->d_name) + 1; // source len
+      sourcePath = malloc(sourceLen);
+      strcpy(sourcePath, source);                                 // set src path
+      strcat(sourcePath,"/");
+      strcat(sourcePath,fileInDir->d_name);
+      destLen = sizeof(dest) + sizeof(fileInDir->d_name) + 1;     // dest len
+      destPath = malloc(destLen);
+      strcpy(destPath, dest);                                     // set dest path
+      strcat(destPath,"/");
+      strcat(destPath,fileInDir->d_name);
+
+      // on file info success
+      if (stat(sourcePath, &fileStat) == 0) {
+        if (S_ISREG(fileStat.st_mode)) {
+          fileCopy(sourcePath, destPath);
+        } else if (S_ISDIR(fileStat.st_mode)) {
+          if (strcmp(fileInDir->d_name,".") != 0 && strcmp(fileInDir->d_name,"..") != 0) {
+            directoryCopy(sourcePath, destPath, rflag);
+          }
+        }
+      } else {
+        printf("stat error\n");
+      }
+      free(sourcePath);
+      free(destPath);
+    }
+    closedir(sourceDirPtr);                                       // close dir
   }
 
 }
@@ -94,40 +150,10 @@ int main (int argc, char **argv)
 
   stat(source, &pathStat);    // get pathStat file details
 
-  if (S_ISREG(pathStat.st_mode)) {                                   // if file
+  if (S_ISREG(pathStat.st_mode)) {       // if file
     fileCopy(source, dest);
-  } else if (S_ISDIR(pathStat.st_mode)) {                            // if directory
-    if (!rflag) {
-      fprintf(stderr,"mycp: %s is a directory (not copied).\n",source);// error
-    } else {
-
-      if ((sourceDirPtr = opendir(source)) == NULL) {                // open dir
-    		fprintf(stderr,"directory not found");
-      }
-
-      if (stat(dest, &destDir) == -1) {                             // create dir
-        mkdir(dest, 0755);
-      }
-
-      while ((fileInDir = readdir(sourceDirPtr)) != NULL) {         // for each file
-        sourceLen = sizeof(source) + sizeof(fileInDir->d_name) + 1; // source len
-        destLen = sizeof(dest) + sizeof(fileInDir->d_name) + 1;     // dest len
-        sourcePath = malloc(sourceLen);
-        destPath = malloc(destLen);
-        strcpy(sourcePath, source);                                 // set src path
-        strcat(sourcePath,"/");
-        strcat(sourcePath,fileInDir->d_name);
-        strcpy(destPath, dest);                                     // set dest path
-        strcat(destPath,"/");
-        strcat(destPath,fileInDir->d_name);
-        fileCopy(sourcePath, destPath);                             // copy file
-        free(sourcePath);                                           // free src path
-        free(destPath);                                             // free dest path
-      }
-
-      closedir(sourceDirPtr);                                       // close dir
-
-    }
+  } else if (S_ISDIR(pathStat.st_mode)) {// if dir, call directoryCopy recursively
+    directoryCopy(source, dest, rflag);
   }
 
   return 0;
