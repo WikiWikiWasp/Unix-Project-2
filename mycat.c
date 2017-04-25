@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
       stat(filename, &pathStat);   // get file info
       fp = fopen(filename, "r");   // open file
       if (fp == NULL) {            // throw error if not found
-        printf("mycat: %s: No such file or directory",filename);
+        printf("mycat: %s: No such file or directory\n",filename);
         exit(1);
       }
       if (S_ISDIR(pathStat.st_mode)) {                  // if dir, not file
