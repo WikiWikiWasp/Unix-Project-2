@@ -63,9 +63,13 @@ int main(int argc, char** argv) {
 	res[n_spaces] = 0;
  
 	strcpy(cmd, res[0]);
-	if (strncmp(cmd, b, strlen(b)) == 0) {
+	if ((strncmp(cmd, b, strlen(b)) == 0) && (strcmp(cmd, "mycd") != 0)) {
 	  strcat(dotslash, cmd);
 	  strcpy(cmd, dotslash);
+	}
+	else if (strcmp(cmd, "mycd") == 0) {
+	  chdir(res[1]);
+	  continue;
 	}
 
 	if (res[1] != NULL) {
